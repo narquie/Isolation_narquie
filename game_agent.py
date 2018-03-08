@@ -211,33 +211,33 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         def maxMove(self,game,depth):
-            """ Return the value for a loss (-1) if the game is over,
-            otherwise return the maximum value over all legal child
-            nodes.
-            """
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
-            if game.get_legal_moves() is None or len(game.get_legal_moves())==0:
+            if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0 or depth == 0:
                 return(self.score(game,self),game.get_player_location(game.active_player))
+            elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
+                priorityMove = game.get_legal_moves()[0]
             v = float("-inf")
             for m in game.get_legal_moves():
-                minMoveVal,_ = minMove(self,game.forecast_move(m),depth)
+                minMoveVal,_ = minMove(self,game.forecast_move(m),depth-1)
+                if v > minMoveVal:
+                    priorityMove = m
                 v = max(v,minMoveVal)
-                return(v,m)
+            return(v,priorityMove)
         def minMove(self,game,depth):
-            """ Return the value for a win (+1) if the game is over,
-            otherwise return the minimum value over all legal child
-            nodes.
-            """
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
             v = float("inf")
-            if game.get_legal_moves() is None or len(game.get_legal_moves())==0:
+            if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0 or depth == 0:
                 return(self.score(game,self),game.get_player_location(game.active_player))
+            elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
+                priorityMove = game.get_legal_moves()[0]
             for m in game.get_legal_moves():
-                maxMoveVal,_ = maxMove(self,game.forecast_move(m),depth)
+                maxMoveVal,_ = maxMove(self,game.forecast_move(m),depth-1)
+                if v < maxMoveVal:
+                    priorityMove = m
                 v = min(v, maxMoveVal)
-                return(v,m)
+            return(v,priorityMove)
         v,moveChosen = maxMove(self,game,depth)
         return(moveChosen)
 
