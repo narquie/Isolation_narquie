@@ -211,16 +211,21 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         def maxMove(self,game,depth):
+            # Catch game if timer runs too long
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
+            # If no more moves left or depth limit has been hit return node's value
             if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0 or depth == 0:
-                return(self.score(game,self),game.get_player_location(game.active_player))
+                return(self.score(game,self),game.get_player_location(game._inactive_player))
+            # Get a random move to initialize moveset
             elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
                 priorityMove = game.get_legal_moves()[0]
             v = float("-inf")
+            # Running iterations over all legal moves
             for m in game.get_legal_moves():
                 minMoveVal,_ = minMove(self,game.forecast_move(m),depth-1)
-                if v > minMoveVal:
+                # Keeping track of priority move
+                if minMoveVal > v:
                     priorityMove = m
                 v = max(v,minMoveVal)
             return(v,priorityMove)
@@ -229,12 +234,12 @@ class MinimaxPlayer(IsolationPlayer):
                 raise SearchTimeout()
             v = float("inf")
             if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0 or depth == 0:
-                return(self.score(game,self),game.get_player_location(game.active_player))
+                return(self.score(game,self),game.get_player_location(game._inactive_player))
             elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
                 priorityMove = game.get_legal_moves()[0]
             for m in game.get_legal_moves():
                 maxMoveVal,_ = maxMove(self,game.forecast_move(m),depth-1)
-                if v < maxMoveVal:
+                if maxMoveVal < v:
                     priorityMove = m
                 v = min(v, maxMoveVal)
             return(v,priorityMove)
@@ -279,8 +284,20 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         self.time_left = time_left
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Initialize the best move so that this function returns something
+        # in case the search fails due to timeout
+        best_move = (-1, -1)
+
+        try:
+            # The try/except block will automatically catch the exception
+            # raised when the timer is about to expire.
+            return self.minimax(game, self.search_depth)
+
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed
+
+        # Return the best move from the last completed search iteration
+        return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -330,5 +347,38 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        def maxMove(self,game,depth):
+            # Catch game if timer runs too long
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+            # If no more moves left or depth limit has been hit return node's value
+            if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0 or depth == 0:
+                return(self.score(game,self),game.get_player_location(game._inactive_player))
+            # Get a random move to initialize moveset
+            elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
+                priorityMove = game.get_legal_moves()[0]
+            v = float("-inf")
+            # Running iterations over all legal moves
+            for m in game.get_legal_moves():
+                minMoveVal,_ = minMove(self,game.forecast_move(m),depth-1)
+                # Keeping track of priority move
+                if minMoveVal > v:
+                    priorityMove = m
+                v = max(v,minMoveVal)
+            return(v,priorityMove)
+        def minMove(self,game,depth):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+            v = float("inf")
+            if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0 or depth == 0:
+                return(self.score(game,self),game.get_player_location(game._inactive_player))
+            elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
+                priorityMove = game.get_legal_moves()[0]
+            for m in game.get_legal_moves():
+                maxMoveVal,_ = maxMove(self,game.forecast_move(m),depth-1)
+                if maxMoveVal < v:
+                    priorityMove = m
+                v = min(v, maxMoveVal)
+            return(v,priorityMove)
+        v,moveChosen = maxMove(self,game,depth)
+        return(moveChosen)
