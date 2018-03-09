@@ -33,7 +33,7 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    return(len(game.get_legal_moves(player)))
+    return(float(len(game.get_legal_moves(player))))
 
 
 def custom_score_2(game, player):
@@ -283,7 +283,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             (-1, -1) if there are no available legal moves.
         """
         self.time_left = time_left
-
+        self.cutoff = True
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
         best_move = (-1, -1)
@@ -291,7 +291,12 @@ class AlphaBetaPlayer(IsolationPlayer):
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            return self.alphabeta(game, self.search_depth)
+            depth = 0
+            while(self.cutoff):
+                best_move = self.alphabeta(game,depth)
+                if self.cutoff:
+                    depth += 1
+            return(best_move)
 
         except SearchTimeout:
             pass  # Handle any actions required after timeout as needed
@@ -352,34 +357,52 @@ class AlphaBetaPlayer(IsolationPlayer):
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
             # If no more moves left or depth limit has been hit return node's value
-            if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0 or depth == 0:
+            if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0:
+                self.cutoff = False
+                return(self.score(game,self),game.get_player_location(game._inactive_player))
+            # Register end game and cutoff
+            elif depth == 0:
+                self.cutoff = True
                 return(self.score(game,self),game.get_player_location(game._inactive_player))
             # Get a random move to initialize moveset
             elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
+                self.cutoff = False
                 priorityMove = game.get_legal_moves()[0]
             v = float("-inf")
+            cutoffcurrent = True
             # Running iterations over all legal moves
             for m in game.get_legal_moves():
                 minMoveVal,_ = minMove(self,game.forecast_move(m),depth-1)
+                cutoffcurrent = min(self.cutoff,cutoffcurrent)
                 # Keeping track of priority move
                 if minMoveVal > v:
                     priorityMove = m
                 v = max(v,minMoveVal)
+            self.cutoff = cutoffcurrent
             return(v,priorityMove)
-            
+
         def minMove(self,game,depth):
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
-            v = float("inf")
-            if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0 or depth == 0:
+            if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0:
+                self.cutoff = False
+                return(self.score(game,self),game.get_player_location(game._inactive_player))
+            # Register end game and cutoff
+            elif depth == 0:
+                self.cutoff = True
                 return(self.score(game,self),game.get_player_location(game._inactive_player))
             elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
+                self.cutoff = False
                 priorityMove = game.get_legal_moves()[0]
+            v = float("inf")
+            cutoffcurrent = True
             for m in game.get_legal_moves():
                 maxMoveVal,_ = maxMove(self,game.forecast_move(m),depth-1)
+                cutoffcurrent = min(self.cutoff,cutoffcurrent)
                 if maxMoveVal < v:
                     priorityMove = m
                 v = min(v, maxMoveVal)
+            self.cutoff = cutoffcurrent
             return(v,priorityMove)
         v,moveChosen = maxMove(self,game,depth)
         return(moveChosen)
