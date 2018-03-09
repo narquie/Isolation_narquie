@@ -291,7 +291,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            return self.minimax(game, self.search_depth)
+            return self.alphabeta(game, self.search_depth)
 
         except SearchTimeout:
             pass  # Handle any actions required after timeout as needed
@@ -366,6 +366,7 @@ class AlphaBetaPlayer(IsolationPlayer):
                     priorityMove = m
                 v = max(v,minMoveVal)
             return(v,priorityMove)
+            
         def minMove(self,game,depth):
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
