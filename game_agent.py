@@ -352,7 +352,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        def maxMove(self,game,depth):
+        def maxMove(self,game,depth,alpha,beta):
             # Catch game if timer runs too long
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
@@ -372,16 +372,21 @@ class AlphaBetaPlayer(IsolationPlayer):
             cutoffcurrent = True
             # Running iterations over all legal moves
             for m in game.get_legal_moves():
-                minMoveVal,_ = minMove(self,game.forecast_move(m),depth-1)
+                minMoveVal,_ = minMove(self,game.forecast_move(m),depth-1,alpha,beta)
                 cutoffcurrent = min(self.cutoff,cutoffcurrent)
                 # Keeping track of priority move
                 if minMoveVal > v:
                     priorityMove = m
                 v = max(v,minMoveVal)
+                # Alpha beta pruning... if Beta is smaller (min value of higher
+                # node), return v
+                if v >= beta:
+                    return(v,priorityMove)
+                alpha = max(alpha,v)
             self.cutoff = cutoffcurrent
             return(v,priorityMove)
 
-        def minMove(self,game,depth):
+        def minMove(self,game,depth,alpha,beta):
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
             if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0:
@@ -397,12 +402,15 @@ class AlphaBetaPlayer(IsolationPlayer):
             v = float("inf")
             cutoffcurrent = True
             for m in game.get_legal_moves():
-                maxMoveVal,_ = maxMove(self,game.forecast_move(m),depth-1)
+                maxMoveVal,_ = maxMove(self,game.forecast_move(m),depth-1,alpha,beta)
                 cutoffcurrent = min(self.cutoff,cutoffcurrent)
                 if maxMoveVal < v:
                     priorityMove = m
                 v = min(v, maxMoveVal)
+                if v <= alpha:
+                    return (v,priorityMove)
+                beta = min(beta, v)
             self.cutoff = cutoffcurrent
             return(v,priorityMove)
-        v,moveChosen = maxMove(self,game,depth)
+        v,moveChosen = maxMove(self,game,depth,alpha,beta)
         return(moveChosen)
