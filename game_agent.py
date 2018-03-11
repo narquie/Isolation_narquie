@@ -33,7 +33,12 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    return(float(len(game.get_legal_moves(player))))
+    if float(len(game.get_legal_moves(player)))== 0:
+        return(float(0))
+    elif float(len(game.get_legal_moves(game.get_opponent(player)))) == 0 :
+        return(float("inf"))
+    else:
+        return(5*float(len(game.get_legal_moves(player)))/float(len(game.get_legal_moves(game.get_opponent(player)))))
 
 
 def custom_score_2(game, player):
@@ -58,7 +63,14 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    return(float(len(game.get_legal_moves(player)))-float(len(game.get_legal_moves(game.get_opponent(player)))))
+    if float(len(game.get_legal_moves(player)))== 0:
+        return(float(0))
+    elif float(len(game.get_legal_moves(game.get_opponent(player)))) == 0:
+        return(float("inf"))
+    else:
+        subtract = 2*float(len(game.get_legal_moves(player)))-float(len(game.get_legal_moves(game.get_opponent(player))))
+        divide = 5*float(len(game.get_legal_moves(player)))/float(len(game.get_legal_moves(game.get_opponent(player))))
+        return(subtract+divide)
 
 
 def custom_score_3(game, player):
@@ -83,10 +95,14 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    if float(len(game.get_legal_moves(game.get_opponent(player)))) == 0:
+    if float(len(game.get_legal_moves(player)))== 0:
+        return(float(0))
+    elif float(len(game.get_legal_moves(game.get_opponent(player)))) == 0:
         return(float("inf"))
     else:
-        return(float(len(game.get_legal_moves(player)))/float(len(game.get_legal_moves(game.get_opponent(player)))))
+        subtract = float(len(game.get_legal_moves(player)))-float(len(game.get_legal_moves(game.get_opponent(player))))
+        divide = 5*float(len(game.get_legal_moves(player)))/float(len(game.get_legal_moves(game.get_opponent(player))))
+        return(subtract+divide)
 
 
 class IsolationPlayer:
