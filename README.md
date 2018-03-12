@@ -9,3 +9,5 @@ The heuristics that I developed are on par with this Alpha-Beta pruning opponent
 The techniques I used were minimax, Alpha-Beta search, and iterative deepening. I constructed a heuristic which values locking opponents into disadvantageous positions rather than maximizing its own movements. 
 
 The code cannot be run without the helper classes included... run tournament.py for results of the three heuristics I created against the Alpha-Beta pruning opponent.
+
+game_agent.py contains the code that I wrote... the initial classes in game_agent.py and the rest of the code in this repository was wrote by Udacity as part of the AI Nanodegree
