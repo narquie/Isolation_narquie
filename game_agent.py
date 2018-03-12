@@ -33,6 +33,8 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    ## Number of legal moves by player divided by number of legal moves by
+    ## opponent. Returns higher values the less moves the opponent has.
     if float(len(game.get_legal_moves(player)))== 0:
         return(float(0))
     elif float(len(game.get_legal_moves(game.get_opponent(player)))) == 0 :
@@ -63,6 +65,9 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    ## custom_score with the addition of the number of legal moves of the player
+    ## minus the number of legal moves by the opponent. Hoping to get a result
+    ## of "best of both worlds" here.
     if float(len(game.get_legal_moves(player)))== 0:
         return(float(0))
     elif float(len(game.get_legal_moves(game.get_opponent(player)))) == 0:
@@ -95,6 +100,8 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    ## Same idea as custom_score_2, except that "subtract" is less heavily
+    ## weighted as divide.
     if float(len(game.get_legal_moves(player)))== 0:
         return(float(0))
     elif float(len(game.get_legal_moves(game.get_opponent(player)))) == 0:
@@ -247,15 +254,20 @@ class MinimaxPlayer(IsolationPlayer):
                 v = max(v,minMoveVal)
             return(v,priorityMove)
         def minMove(self,game,depth):
+            # Catch game if timer runs too long
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
             v = float("inf")
+            # If no more moves left or depth limit has been hit return node's value
             if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0 or depth == 0:
                 return(self.score(game,self),game.get_player_location(game._inactive_player))
+            # Get a random move to initialize moveset
             elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
                 priorityMove = game.get_legal_moves()[0]
+            # Running iterations over all legal moves
             for m in game.get_legal_moves():
                 maxMoveVal,_ = maxMove(self,game.forecast_move(m),depth-1)
+                # Keeping track of priority move
                 if maxMoveVal < v:
                     priorityMove = m
                 v = min(v, maxMoveVal)
@@ -309,6 +321,8 @@ class AlphaBetaPlayer(IsolationPlayer):
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
             depth = 0
+            # Check for cutoff (which means depth has been hit) and continue
+            # with a deeper search
             while(self.cutoff):
                 best_move = self.alphabeta(game,depth)
                 if self.cutoff:
@@ -385,18 +399,21 @@ class AlphaBetaPlayer(IsolationPlayer):
             elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
                 self.cutoff = False
                 priorityMove = game.get_legal_moves()[0]
+            # Init values for v and cutoffcurrent
             v = float("-inf")
             cutoffcurrent = True
             # Running iterations over all legal moves
             for m in game.get_legal_moves():
                 minMoveVal,_ = minMove(self,game.forecast_move(m),depth-1,alpha,beta)
+                # Defaulting to false once a false value has been found
                 cutoffcurrent = min(self.cutoff,cutoffcurrent)
                 # Keeping track of priority move
                 if minMoveVal > v:
                     priorityMove = m
                 v = max(v,minMoveVal)
                 # Alpha beta pruning... if Beta is smaller (min value of higher
-                # node), return v
+                # node), return v (skips nodes that would not return valueable
+                # results)
                 if v >= beta:
                     return(v,priorityMove)
                 alpha = max(alpha,v)
@@ -404,8 +421,10 @@ class AlphaBetaPlayer(IsolationPlayer):
             return(v,priorityMove)
 
         def minMove(self,game,depth,alpha,beta):
+            # Catch game if timer runs too long
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
+            # If no more moves left or depth limit has been hit return node's value
             if game.get_legal_moves() is None or len(game.get_legal_moves()) == 0:
                 self.cutoff = False
                 return(self.score(game,self),game.get_player_location(game._inactive_player))
@@ -413,17 +432,25 @@ class AlphaBetaPlayer(IsolationPlayer):
             elif depth == 0:
                 self.cutoff = True
                 return(self.score(game,self),game.get_player_location(game._inactive_player))
+            # Get a random move to initialize moveset
             elif game.get_legal_moves() is not None and len(game.get_legal_moves()) != 0:
                 self.cutoff = False
                 priorityMove = game.get_legal_moves()[0]
+            # Init values for v and cutoffcurrent
             v = float("inf")
             cutoffcurrent = True
+            # Running iterations over all legal moves
             for m in game.get_legal_moves():
                 maxMoveVal,_ = maxMove(self,game.forecast_move(m),depth-1,alpha,beta)
+                # Defaulting to false once a false value has been found
                 cutoffcurrent = min(self.cutoff,cutoffcurrent)
+                # Keeping track of priority move
                 if maxMoveVal < v:
                     priorityMove = m
                 v = min(v, maxMoveVal)
+                # Alpha beta pruning... if alpha is larger (max value of higher
+                # node), return v (skips nodes that would not return valueable
+                # results)
                 if v <= alpha:
                     return (v,priorityMove)
                 beta = min(beta, v)
